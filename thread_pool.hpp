@@ -33,13 +33,11 @@
 #include <condition_variable>
 #include <future>
 #include <atomic>
-#include <functional>
 #include <stdexcept>
 #include <algorithm>
 #include <cassert>
+#include "delegate.hpp"
 
-
-namespace progschj {
 
 class ThreadPool {
 public:
@@ -57,7 +55,7 @@ private:
     // need to keep track of threads so we can join them
     std::vector< std::thread > workers;
     // the task queue
-    std::queue< std::function<void()> > tasks;
+    std::queue< delegate<void()> > tasks;
     // queue length limit
     std::size_t max_queue_size = 100000;
     // stop signal
@@ -105,7 +103,7 @@ inline ThreadPool::ThreadPool(std::size_t threads)
             {
                 for(;;)
                 {
-                    std::function<void()> task;
+                    delegate<void()> task;
                     bool notify;
 
                     {
@@ -209,7 +207,5 @@ inline void ThreadPool::set_queue_size_limit(std::size_t limit)
     if (old_limit < max_queue_size)
         condition_producers.notify_all();
 }
-
-} // namespace progschj
 
 #endif // THREAD_POOL_H_7ea1ee6b_4f17_4c09_b76b_3d44e102400c
